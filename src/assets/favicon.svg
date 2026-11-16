@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48">
+  <style>.drop{fill:#146c94}.glint{stroke:#eaf7ff}@media(prefers-color-scheme:dark){.drop{fill:#7dd3fc}.glint{stroke:#0b1f33}}</style>
+  <path class="drop" d="M20 2C17 10 5 22 5 30a15 15 0 0 0 30 0C35 22 23 10 20 2Z"/>
+  <path class="glint" d="M12 32a8 8 0 0 0 8 8" fill="none" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
