@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<main id="main" class="editorial-page"><section class="wrap" aria-labelledby="tag-heading">
+<header class="page-intro"><h1 id="tag-heading">{{ term.name }}</h1><p>Projects in this subject.</p><a class="text-link" href="/tags/">All subjects</a></header>
+<div class="work-list">{% for project in term.pages %}{% include "partials/project.html" %}{% endfor %}</div>
+</section></main>
+{% endblock content %}

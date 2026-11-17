@@ -63,6 +63,7 @@ test("normal document navigation works without JavaScript, including direct link
   const hosts = new Set();
   page.on("request", (request) => hosts.add(new URL(request.url()).hostname));
   await page.goto("http://127.0.0.1:5191/");
+  await expect(page.locator("#hero-heading")).toHaveText("FullyImmersed.");
   await page.getByRole("link", { name: "Explore our work" }).click();
   await expect(page).toHaveURL(/\/work\/$/);
   await page
@@ -71,7 +72,7 @@ test("normal document navigation works without JavaScript, including direct link
     .click();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await page.reload();
-  await expect(page).toHaveTitle("About — Moist");
+  await expect(page).toHaveTitle("About - Moist");
   await page.goBack();
   await expect(page).toHaveURL(/\/work\/$/);
   expect([...hosts]).toEqual(["127.0.0.1"]);
@@ -147,3 +148,87 @@ test("theme remains usable when local storage is unavailable", async ({
   await page.getByRole("button", { name: "Use dark theme" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
+
+test("catalog navigation stays local and works without JavaScript", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto("http://127.0.0.1:5191/work/");
+  await page.getByRole("link", { name: "ARF", exact: true }).click();
+  await expect(page).toHaveURL("http://127.0.0.1:5191/work/arf/");
+  await page.getByRole("link", { name: "Specifications", exact: true }).click();
+  await expect(page).toHaveURL("http://127.0.0.1:5191/tags/specifications/");
+  await page.getByRole("link", { name: "JOBL", exact: true }).click();
+  await expect(page).toHaveURL("http://127.0.0.1:5191/work/jobl/");
+  await expect(
+    page
+      .getByRole("link", { name: "GitHub", exact: true })
+      .filter({ hasNot: page.locator("nav") }),
+  ).not.toHaveCount(0);
+  await context.close();
+});
+
+for (const width of [390, 1440]) {
+  for (const path of ["work/arf", "tags", "tags/specifications"]) {
+    test(`catalog ${path} at ${width}`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/${path}/`);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      expect(
+        (
+          await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+            .analyze()
+        ).violations,
+      ).toEqual([]);
+      await page.screenshot({
+        path: `artifacts/${path.replaceAll("/", "-")}-${width}.png`,
+        fullPage: true,
+      });
+    });
+  }
+}
+
+for (const width of [320, 1440]) {
+  test(`tagline is selected once per load without changing hero layout at ${width}px`, async ({
+    context,
+  }) => {
+    let firstHeight;
+    for (const [random, expected] of [
+      [0.1, ["Fully", "Immersed."]],
+      [0.9, ["Stay", "Hydrated."]],
+    ]) {
+      const page = await context.newPage();
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript((value) => {
+        window.taglineRandomCalls = 0;
+        Math.random = () => {
+          window.taglineRandomCalls++;
+          return value;
+        };
+      }, random);
+      await page.goto("/");
+      await page.evaluate(() => document.fonts.ready);
+      const heading = page.locator("#hero-heading");
+      await expect(heading.locator("span")).toHaveText(expected);
+      const { height } = await heading.boundingBox();
+      if (firstHeight !== undefined) expect(height).toBe(firstHeight);
+      firstHeight = height;
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.getByRole("button", { name: "Use dark theme" }).click();
+      await expect(heading.locator("span")).toHaveText(expected);
+      expect(await page.evaluate(() => window.taglineRandomCalls)).toBe(1);
+      await page.evaluate(() => localStorage.clear());
+      await page.close();
+    }
+  });
+}

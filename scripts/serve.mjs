@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
-const root = resolve(process.argv.includes("--source") ? "src" : "dist");
+const root = resolve("dist");
 const port = Number(process.env.PORT || 5190);
 const types = {
   ".js": "text/javascript; charset=utf-8",

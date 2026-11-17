@@ -1,0 +1,3 @@
+<ul class="project-tags" aria-label="Project tags">
+{% for tag in project.taxonomies.tags %}<li><a href="{{ get_taxonomy_url(kind='tags', name=tag) | replace(from=config.base_url, to='') }}">{{ tag }}</a></li>{% endfor %}
+</ul>

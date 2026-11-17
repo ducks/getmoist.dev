@@ -23,7 +23,7 @@
     }
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", theme === "dark" ? "#0b1f33" : "#fafcfd");
+      ?.setAttribute("content", theme === "dark" ? "#0b1f33" : "#f8f6f2");
   }
   apply(choice || (system.matches ? "dark" : "light"));
   document.addEventListener("DOMContentLoaded", () => {

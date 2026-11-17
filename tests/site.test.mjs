@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import {
   readFileSync,
@@ -6,63 +6,96 @@ import {
   mkdtempSync,
   rmSync,
   readdirSync,
+  cpSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { execFileSync } from "node:child_process";
 import { build } from "../scripts/build.mjs";
-test("build is repeatable, references real local assets, and contains only public files", () => {
-  const out = mkdtempSync(join(tmpdir(), "moist-"));
-  try {
-    build(out);
-    const first = readFileSync(join(out, "index.html"), "utf8");
-    const stylesheet = first.match(/href="\/(styles\.[a-f0-9]+\.css)"/)[1];
-    assert.ok(existsSync(join(out, stylesheet)));
-    for (const match of first.matchAll(/(?:href|src)="(\/[^"#]*)"/g)) {
-      if (match[1] !== "/")
-        assert.ok(existsSync(join(out, match[1])), match[1]);
-    }
-    assert.equal(
-      readFileSync(join(out, "CNAME"), "utf8").trim(),
-      "getmoist.dev",
-    );
-    assert.ok(existsSync(join(out, ".nojekyll")));
-    assert.ok(
-      !readdirSync(out).some((f) => /node_modules|package|scripts/.test(f)),
-    );
-    build(out);
-    assert.equal(readFileSync(join(out, "index.html"), "utf8"), first);
-  } finally {
-    rmSync(out, { recursive: true, force: true });
-  }
-});
-test("navigation has real targets and unreleased research stays unpublished", () => {
-  const html = readFileSync("src/index.html", "utf8");
-  for (const [, id] of html.matchAll(/href="#([^"]+)"/g))
-    assert.ok(html.includes(`id="${id}"`));
-  assert.equal((html.match(/<h1\b/g) || []).length, 1);
-  assert.ok(!existsSync("src/research/index.html"));
-  assert.ok(!/littlerack|fonts.googleapis|googletagmanager/i.test(html));
-  for (const url of [
-    "https://replaybook.dev",
-    "https://github.com/ducks/murmur",
-    "https://beanledger.coffee",
-  ])
-    assert.ok(
-      readFileSync("src/work/index.html", "utf8").includes(`href="${url}"`),
-    );
-});
-
-test("every page has a unique canonical URL, title, one primary heading and a sitemap entry", () => {
-  const sitemap = readFileSync("src/sitemap.xml", "utf8");
+const out = mkdtempSync(join(tmpdir(), "moist-zola-"));
+before(() => build(out));
+after(() => rmSync(out, { recursive: true, force: true }));
+const html = (route = "") =>
+  readFileSync(join(out, route, "index.html"), "utf8");
+function files(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((item) =>
+    item.isDirectory() ? files(join(dir, item.name)) : [join(dir, item.name)],
+  );
+}
+test("every generated HTML document has a heading, title, working internal links and fingerprinted assets", () => {
   const titles = new Set();
-  for (const slug of ["", "work/", "about/"]) {
-    const html = readFileSync(`src/${slug}index.html`, "utf8");
-    assert.equal((html.match(/<h1\b/g) || []).length, 1);
-    assert.ok(html.includes(`href="https://getmoist.dev/${slug}"`));
-    assert.ok(sitemap.includes(`<loc>https://getmoist.dev/${slug}</loc>`));
-    titles.add(html.match(/<title>(.*?)<\/title>/)[1]);
-    for (const [, id] of html.matchAll(/href="#([^"]+)"/g))
-      assert.ok(html.includes(`id="${id}"`));
+  for (const file of files(out).filter((f) => f.endsWith(".html"))) {
+    const text = readFileSync(file, "utf8");
+    assert.equal((text.match(/<h1\b/g) || []).length, 1, file);
+    const title = text.match(/<title>(.*?)<\/title>/s)[1];
+    assert.ok(!titles.has(title), title);
+    titles.add(title);
+    assert.match(text, /styles\.[a-f0-9]{12}\.css/);
+    assert.match(text, /theme\.[a-f0-9]{12}\.js/);
+    for (const [, href] of text.matchAll(/(?:href|src)="([^"]+)"/g)) {
+      const url = new URL(
+        href,
+        "https://getmoist.dev" + file.slice(out.length),
+      );
+      if (url.hostname !== "getmoist.dev") continue;
+      const target = join(
+        out,
+        url.pathname.endsWith("/") ? url.pathname + "index.html" : url.pathname,
+      );
+      assert.ok(existsSync(target), `${file}: ${href}`);
+      if (url.hash && target.endsWith(".html"))
+        assert.ok(
+          readFileSync(target, "utf8").includes(`id="${url.hash.slice(1)}"`),
+          href,
+        );
+    }
   }
-  assert.equal(titles.size, 3);
+  assert.ok(!existsSync(join(out, "research")));
+  assert.ok(!existsSync(join(out, "content")));
+  assert.equal(readFileSync(join(out, "CNAME"), "utf8").trim(), "getmoist.dev");
+});
+test("project pages and tag listings derive from content with conservative statuses", () => {
+  for (const slug of ["arf", "date-ver", "jobl", "discourse-rs"]) {
+    assert.ok(html("work").includes(`/work/${slug}/`));
+    assert.ok(
+      readFileSync(join(out, "sitemap.xml"), "utf8").includes(`/work/${slug}/`),
+    );
+  }
+  assert.ok(html("tags/specifications").includes("/work/arf/"));
+  assert.ok(html("tags/specifications").includes("/work/date-ver/"));
+  assert.ok(html("tags/specifications").includes("/work/jobl/"));
+  assert.ok(!html("tags/specifications").includes("/work/beanledger/"));
+  assert.ok(html("work/discourse-rs").includes("Experimental"));
+  assert.ok(
+    html("work/discourse-rs").includes("not a claim of complete compatibility"),
+  );
+  assert.match(html("work/arf"), /href="https:\/\/github.com\/ducks\/arf"/);
+  assert.match(html("about"), /https:\/\/getmoist.dev\/about\//);
+});
+test("build output is repeatable", () => {
+  const first = html();
+  build(out);
+  assert.equal(html(), first);
+});
+test("draft entries do not leak into the catalog, tag pages or sitemap", () => {
+  const scratch = mkdtempSync(join(tmpdir(), "moist-draft-"));
+  try {
+    for (const name of ["config.toml", "content", "templates", "static"])
+      cpSync(name, join(scratch, name), { recursive: true });
+    writeFileSync(
+      join(scratch, "content/work/hidden.md"),
+      '+++\ntitle="HIDDEN_DRAFT"\ndraft=true\n[taxonomies]\ntags=["SECRET_TAG"]\n+++\nNot published.\n',
+    );
+    execFileSync("zola", ["build"], { cwd: scratch, stdio: "pipe" });
+    for (const file of files(join(scratch, "public")).filter((f) =>
+      /\.(html|xml)$/.test(f),
+    )) {
+      const text = readFileSync(file, "utf8");
+      assert.ok(!text.includes("HIDDEN_DRAFT"));
+      assert.ok(!text.includes("SECRET_TAG"));
+    }
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
 });

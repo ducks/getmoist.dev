@@ -5,4 +5,8 @@ test-results
 playwright-report
 package-lock.json
 flake.lock
-src/assets/*.svg
+static/assets/*.svg
+
+templates/
+.zola-dev/
+public/

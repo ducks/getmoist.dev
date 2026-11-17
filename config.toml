@@ -1,0 +1,8 @@
+base_url = "https://getmoist.dev"
+title = "Moist - Fully Immersed."
+description = "Independent software, developer tools, and experimental AI."
+compile_sass = false
+build_search_index = false
+generate_feeds = false
+minify_html = false
+taxonomies = [{ name = "tags", feed = false }]

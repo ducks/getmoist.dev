@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<main id="main" class="editorial-page"><article class="project-page wrap">
+<a class="back-link" href="/work/">All projects</a>
+<header class="page-intro"><h1>{{ page.title }}</h1><p class="project-kind">{{ page.extra.kind }} · {{ page.extra.status }}</p></header>
+<div class="project-prose"><p class="lede">{{ page.description }}</p>{{ page.content | safe }}</div>
+{% set project = page %}{% include "partials/tags.html" %}
+<div class="project-outlinks">{% if page.extra.website %}<a class="button" href="{{ page.extra.website }}">Visit {{ page.title }}</a>{% endif %}<a class="text-link" href="{{ page.extra.repository }}">Source on GitHub</a></div>
+</article></main>
+{% endblock content %}

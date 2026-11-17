@@ -1,0 +1,6 @@
+<article class="work-entry">
+<div class="project-body">
+<div class="project-title"><{% if home_cards %}h3{% else %}h2{% endif %}><a href="{{ project.path }}">{{ project.title }}</a></{% if home_cards %}h3{% else %}h2{% endif %}><span class="project-status">{{ project.extra.status }}</span></div>
+<p class="project-description">{{ project.description }}</p>
+<div class="project-links"><a href="{{ project.path }}">About project <span aria-hidden="true">→</span></a>{% if project.extra.website %}<a href="{{ project.extra.website }}">Website <span aria-hidden="true">↗</span></a>{% endif %}<a href="{{ project.extra.repository }}">GitHub <span aria-hidden="true">↗</span></a></div>
+</div></article>
