@@ -1,16 +1,19 @@
 import {
-  cpSync,
   readFileSync,
   writeFileSync,
   rmSync,
   renameSync,
   readdirSync,
 } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 export function build(output = "dist") {
   rmSync(output, { recursive: true, force: true });
-  cpSync("src", output, { recursive: true });
+  execFileSync("zola", ["build", "--output-dir", resolve(output), "--force"], {
+    stdio: "pipe",
+  });
   const css = readFileSync(join(output, "styles.css"), "utf8");
   const name = `styles.${createHash("sha256").update(css).digest("hex").slice(0, 12)}.css`;
   renameSync(join(output, "styles.css"), join(output, name));

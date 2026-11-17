@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<main id="main" class="editorial-page"><section class="wrap" aria-labelledby="tags-heading">
+<header class="page-intro"><h1 id="tags-heading">Browse by subject.</h1><p>Different projects, some shared interests.</p><a class="text-link" href="/work/">All projects</a></header>
+<ul class="tag-index">{% for term in terms %}<li><a href="{{ term.permalink | replace(from=config.base_url, to="") }}">{{ term.name }} <span>{{ term.pages | length }} projects</span></a></li>{% endfor %}</ul>
+</section></main>
+{% endblock content %}

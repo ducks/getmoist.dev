@@ -8,11 +8,11 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "dev": "node scripts/serve.mjs --source",
+    "dev": "zola serve --interface 127.0.0.1 --port 5190 --output-dir .zola-dev",
     "preview": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "playwright test",
-    "lint": "html-validate \"src/**/*.html\" && prettier --check .",
+    "lint": "npm run build && html-validate \"dist/**/*.html\" && prettier --check .",
     "format": "prettier --write ."
   },
   "devDependencies": {

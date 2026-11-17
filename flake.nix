@@ -8,14 +8,15 @@
     in {
       devShells = each (system:
         let pkgs = import nixpkgs { inherit system; };
-        in { default = pkgs.mkShell { packages = [ pkgs.nodejs_24 pkgs.gnumake pkgs.git ]; }; });
+        in { default = pkgs.mkShell { packages = [ pkgs.zola pkgs.nodejs_24 pkgs.gnumake pkgs.git ]; }; });
       packages = each (system:
         let pkgs = import nixpkgs { inherit system; };
         in { default = pkgs.stdenvNoCC.mkDerivation {
           pname = "moist-site";
           version = "1.0.0";
           src = self;
-          nativeBuildInputs = [ pkgs.nodejs_24 ];
+          nativeBuildInputs = [ pkgs.zola pkgs.nodejs_24 ];
+          SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
           buildPhase = "node scripts/build.mjs";
           doCheck = true;
           checkPhase = "node --test tests/*.test.mjs";
