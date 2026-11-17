@@ -60,12 +60,13 @@ only. Keep `static/assets/social.png` in Git so normal builds need no browser.
    `CNAME` records the intended hostname but is ignored by the Actions publishing
    flow; the repository Pages setting controls the domain.
 4. Enable HTTPS once the certificate is available.
-5. Run `make release-prep`, merge the reviewed feature branch to `main`, and run
-   **Publish GitHub Pages** manually from Actions on `main`.
+5. Run `make release-prep`, merge the reviewed feature branch to `main`, and push
+   `main`. **Publish GitHub Pages** runs automatically after each push.
 
-The publication workflow is manual and limited to `main`; regular pushes/PRs run
-checks only. To roll back, revert the relevant source change on a feature branch,
-review/merge, then rerun the workflow. No secrets are required for static content.
+The publication workflow is limited to `main` and runs the full release checks
+before deploying. Pull requests run checks without publishing. A manual Actions
+trigger remains available for retries. To roll back, revert the relevant source change on a feature branch,
+review/merge, then push `main` to publish the revert. No secrets are required for static content.
 Assets use root-relative paths for this custom-domain site; a `/repository/`
 project URL is not a supported production base. `404.html`, `robots.txt`, sitemap,
 favicon, canonical and social metadata are included.

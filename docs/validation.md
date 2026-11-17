@@ -32,7 +32,7 @@ behavior, real network latency, or external service uptime.
 
 Sources and external destinations were checked during implementation (see
 [sources.md](sources.md)). External availability is deliberately not a CI network
-dependency. Publishing uses the manual Pages workflow in `ducks/getmoist.dev`; deployment
+dependency. Publishing uses the Pages workflow triggered by pushes to main or manually in `ducks/getmoist.dev`; deployment
 status is recorded in GitHub Actions. No Caddy configuration is installed. Manual screen-reader testing and Safari/
 Firefox visual reviews remain release checks; automated axe tests do not cover
 all accessibility needs.
