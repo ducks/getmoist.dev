@@ -1,0 +1,4 @@
+{% set subjects = get_taxonomy(kind="tags") %}<ul class="project-badges catalog-tags" aria-label="Browse projects by subject">
+{% for subject in subjects.items %}<li><a class="project-badge" href="{{ subject.permalink | replace(from=config.base_url, to='') }}"{% if term and term.name == subject.name %} aria-current="page"{% endif %}>{{ subject.name }}</a></li>{% endfor %}
+{% if term %}<li><a class="project-badge clear-subject" href="/work/" aria-label="Clear tag selection" title="Show all projects"><span aria-hidden="true">×</span></a></li>{% endif %}
+</ul>

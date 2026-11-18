@@ -1,15 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <main id="main" class="editorial-page"><section class="work-editorial wrap" aria-labelledby="work-heading">
-<header class="page-intro"><h1 id="work-heading">The work.</h1>{{ section.content | safe }}<a class="text-link" href="/tags/">Browse by subject</a></header>
+<header class="page-intro"><h1 id="work-heading">The work.</h1>{{ section.content | safe }}{% include "partials/subject-nav.html" %}</header>
 <div class="work-list">
-
-{% for project in section.pages %}{% if project.extra.featured %}{% include "partials/project.html" %}{% endif %}{% endfor %}
+{% for project in section.pages %}{% include "partials/project.html" %}{% endfor %}
 </div>
-<section class="more-projects" aria-labelledby="more-heading"><h2 id="more-heading">Tools &amp; specifications</h2><p>Libraries, formats, and command-line tools built along the way.</p><dl>
-{% for project in section.pages %}{% if not project.extra.featured %}
-<div><dt><a href="{{ project.path }}">{{ project.title }}</a></dt><dd>{{ project.description }}</dd></div>
-{% endif %}{% endfor %}
-</dl><a class="text-link" href="https://github.com/ducks?tab=repositories">All repositories on GitHub</a></section>
+<p class="catalog-more"><a class="text-link" href="https://github.com/ducks?tab=repositories">All repositories on GitHub</a></p>
 </section></main>
 {% endblock content %}

@@ -110,7 +110,8 @@ Lighthouse 95+ scores are targets; only measured results should be reported.
 Add a Markdown file under `content/work/`, following an existing entry.
 Use title, description and weight for the listing; lower weights appear first.
 The `taxonomies.tags` array generates subject pages automatically. Set
-`extra.featured` for an editorial row, or false for the compact tools list.
+`extra.featured` to include a project on the homepage. The Work page displays
+all projects using the same card layout.
 Keep `extra.kind`, `extra.status`, `extra.repository` and `extra.website`
 explicit (use an empty website string where unavailable). Markdown body text
 appears on the project's own page. Mark unfinished entries `draft = true`
