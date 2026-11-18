@@ -120,7 +120,5 @@ Do not imply experimental software is commercially available. Record sources in
 `docs/sources.md`. Research models remain unpublished. No RSS feed is generated
 for this catalog. Deployment uses GitHub Actions and GitHub Pages, not Woodpecker.
 
-The homepage chooses either “Fully Immersed.” or “Stay Hydrated.” once per page
-load. It does not animate, rotate on a timer, or store the choice. Without
-JavaScript, “Fully Immersed.” remains visible; metadata and social previews keep
-the original tagline.
+The homepage uses “Stay Hydrated.” as its fixed headline, including without
+JavaScript. Page metadata and the social preview use the same tagline.

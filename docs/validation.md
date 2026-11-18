@@ -8,7 +8,7 @@ Validated production output on a loopback HTTP server, not a public deployment.
   and draft exclusion.
 - Thirty Chromium browser tests pass: all three pages at 320, 390, 768 and
   1440px, plus a no-JavaScript navigation/reload/back/404 test, six dark-theme
-  page/viewport tests, keyboard preference persistence, blocked-storage fallback, project/tag navigation without JavaScript, and both random taglines with stable two-line layout.
+  page/viewport tests, keyboard preference persistence, blocked-storage fallback, project/tag navigation without JavaScript, and the fixed tagline and matching metadata at mobile and desktop sizes.
 - Axe WCAG A/AA checks report zero violations at each tested page/width.
 - Screenshots in ignored `artifacts/` cover every page at every tested width.
   Desktop and mobile screenshots were visually reviewed for typography, spacing,

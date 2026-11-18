@@ -63,7 +63,7 @@ test("normal document navigation works without JavaScript, including direct link
   const hosts = new Set();
   page.on("request", (request) => hosts.add(new URL(request.url()).hostname));
   await page.goto("http://127.0.0.1:5191/");
-  await expect(page.locator("#hero-heading")).toHaveText("FullyImmersed.");
+  await expect(page.locator("#hero-heading")).toHaveText("StayHydrated.");
   await page.getByRole("link", { name: "Explore our work" }).click();
   await expect(page).toHaveURL(/\/work\/$/);
   await page
@@ -195,40 +195,27 @@ for (const width of [390, 1440]) {
 }
 
 for (const width of [320, 1440]) {
-  test(`tagline is selected once per load without changing hero layout at ${width}px`, async ({
-    context,
-  }) => {
-    let firstHeight;
-    for (const [random, expected] of [
-      [0.1, ["Fully", "Immersed."]],
-      [0.9, ["Stay", "Hydrated."]],
-    ]) {
-      const page = await context.newPage();
-      await page.setViewportSize({ width, height: 900 });
-      await page.addInitScript((value) => {
-        window.taglineRandomCalls = 0;
-        Math.random = () => {
-          window.taglineRandomCalls++;
-          return value;
-        };
-      }, random);
-      await page.goto("/");
-      await page.evaluate(() => document.fonts.ready);
-      const heading = page.locator("#hero-heading");
-      await expect(heading.locator("span")).toHaveText(expected);
-      const { height } = await heading.boundingBox();
-      if (firstHeight !== undefined) expect(height).toBe(firstHeight);
-      firstHeight = height;
-      expect(
-        await page.evaluate(
-          () => document.documentElement.scrollWidth <= innerWidth,
-        ),
-      ).toBe(true);
-      await page.getByRole("button", { name: "Use dark theme" }).click();
-      await expect(heading.locator("span")).toHaveText(expected);
-      expect(await page.evaluate(() => window.taglineRandomCalls)).toBe(1);
-      await page.evaluate(() => localStorage.clear());
-      await page.close();
-    }
+  test(`fixed tagline and metadata at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    await expect(page.locator("#hero-heading > span")).toHaveText([
+      "Stay",
+      "Hydrated.",
+    ]);
+    await expect(page).toHaveTitle("Moist - Stay Hydrated.");
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+      "content",
+      "Moist - Stay Hydrated.",
+    );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.reload();
+    await expect(page.locator("#hero-heading > span")).toHaveText([
+      "Stay",
+      "Hydrated.",
+    ]);
   });
 }
