@@ -1,4 +1,4 @@
 +++
-title = "Moist - Fully Immersed."
+title = "Moist - Stay Hydrated."
 template = "index.html"
 +++
