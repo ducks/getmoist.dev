@@ -27,7 +27,6 @@ No customers, usage metrics, model performance claims or team size are implied.
 - https://github.com/ducks/pg-bus - transactional PostgreSQL message bus with
   cursor-based subscriptions and SSE. No throughput or reliability guarantees
   are copied into the site.
-- https://github.com/ducks/tuishot - early Ratatui SVG snapshot testing library.
 
 Repository visibility and README content checked with GitHub API on 2026-11-16.
 
@@ -39,3 +38,13 @@ Public repository READMEs inspected:
 - [DateVer](https://github.com/ducks/date-ver): date-based version specification.
 - [JOBL](https://github.com/ducks/JOBL): TOML resume format and validation.
 - [discourse-rs](https://github.com/ducks/discourse-rs): experimental Rust port; no claim of full parity or production readiness.
+
+## Additional catalog entries (2026-11-18)
+
+Public repository READMEs inspected using GitHub CLI:
+
+- [Discourse Taper](https://github.com/ducks/discourse-taper): live-music archive built on Discourse, with source importers and review queues.
+- [Glow](https://github.com/ducks/glow): VIA/QMK keyboard RGB control through raw HID; compatibility and device permissions are required.
+- [YAML Janitor](https://github.com/ducks/yaml-janitor): comment-preserving YAML linting and formatting using psych-pure, with CLI and Ruby API.
+
+These are catalog additions, not new homepage features. No adoption or production-readiness claims are inferred from repository traffic.

@@ -219,3 +219,26 @@ for (const width of [320, 1440]) {
     ]);
   });
 }
+
+test("tag selection can be cleared without JavaScript", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto("http://127.0.0.1:5191/tags/specifications/");
+  await expect(page.locator('.catalog-tags [aria-current="page"]')).toHaveText(
+    "Specifications",
+  );
+  const clear = page.getByRole("link", {
+    name: "Clear tag selection",
+    exact: true,
+  });
+  await clear.focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL("http://127.0.0.1:5191/work/");
+  await expect(
+    page.getByRole("link", { name: "Clear tag selection", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.locator(".work-entry").filter({ hasText: "BeanLedger" }),
+  ).toBeVisible();
+  await context.close();
+});

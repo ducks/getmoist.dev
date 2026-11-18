@@ -17,10 +17,6 @@
 {% set catalog = get_section(path="work/_index.md") %}
 {% for project in catalog.pages %}{% if project.extra.featured %}{% include "partials/project.html" %}{% endif %}{% endfor %}
   </div>
-{% set subjects = get_taxonomy(kind="tags") %}
-<ul class="subject-pills" aria-label="Browse projects by subject">
-{% for term in subjects.items %}<li><a href="{{ term.permalink | replace(from=config.base_url, to='') }}">{{ term.name }}</a></li>{% endfor %}
-</ul>
 </section>
 <section class="home-about wrap" aria-labelledby="about-heading">
   <img src="/assets/surf-moon.webp" alt="" width="360" height="360" loading="lazy" />
