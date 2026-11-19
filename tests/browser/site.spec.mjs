@@ -194,31 +194,120 @@ for (const width of [390, 1440]) {
   }
 }
 
-for (const width of [320, 1440]) {
-  test(`fixed tagline and metadata at ${width}px`, async ({ page }) => {
+for (const width of [320, 768, 1440]) {
+  test(`random tagline fits at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
-    await expect(page.locator("#hero-heading > span")).toHaveText([
-      "Stay",
+    const heading = page.locator("#hero-heading > span");
+    const initial = await heading.allTextContents();
+    expect([
+      "Fully",
+      "Extremely",
+      "Absolutely",
+      "Thoroughly",
+      "Completely",
+      "Profoundly",
+    ]).toContain(initial[0]);
+    expect([
+      "Immersed.",
+      "Drenched.",
+      "Sopping.",
+      "Saturated.",
+      "Soaked.",
       "Hydrated.",
-    ]);
+    ]).toContain(initial[1]);
     await expect(page).toHaveTitle("Moist - Stay Hydrated.");
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
       "content",
       "Moist - Stay Hydrated.",
     );
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-    ).toBe(true);
-    await page.reload();
-    await expect(page.locator("#hero-heading > span")).toHaveText([
-      "Stay",
-      "Hydrated.",
-    ]);
+    await page.addInitScript(() => {
+      const values = new URLSearchParams(location.search)
+        .get("random")
+        ?.split(",")
+        .map(Number);
+      if (values) Math.random = () => values.shift() ?? 0;
+    });
+    // Cover every word, including the widest combinations, with the real font.
+    for (const first of [
+      "Fully",
+      "Extremely",
+      "Absolutely",
+      "Thoroughly",
+      "Completely",
+      "Profoundly",
+    ]) {
+      for (const second of [
+        "Immersed",
+        "Drenched",
+        "Sopping",
+        "Saturated",
+        "Soaked",
+        "Hydrated",
+      ]) {
+        const firstIndex = [
+          "Fully",
+          "Extremely",
+          "Absolutely",
+          "Thoroughly",
+          "Completely",
+          "Profoundly",
+        ].indexOf(first);
+        const secondIndex = [
+          "Immersed",
+          "Drenched",
+          "Sopping",
+          "Saturated",
+          "Soaked",
+          "Hydrated",
+        ].indexOf(second);
+        await page.goto(
+          `/?random=${(firstIndex + 0.5) / 6},${(secondIndex + 0.5) / 6}`,
+        );
+        await page.evaluate(() => document.fonts.ready);
+        await expect(heading).toHaveText([first, `${second}.`]);
+        expect(
+          await heading.evaluateAll((elements) =>
+            elements.every((el) => el.scrollWidth <= el.clientWidth),
+          ),
+        ).toBe(true);
+        expect(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+          ),
+        ).toBe(true);
+      }
+    }
   });
 }
+
+test("refresh chooses again without tagline storage", async ({ page }) => {
+  await page.addInitScript(() => {
+    Math.random = () => (window.name === "second-load" ? 0.99 : 0);
+    Storage.prototype.getItem = () => {
+      throw new Error("disabled");
+    };
+    Storage.prototype.setItem = () => {
+      throw new Error("disabled");
+    };
+  });
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  await expect(page.locator("#hero-heading > span")).toHaveText([
+    "Fully",
+    "Immersed.",
+  ]);
+  await page.evaluate(() => {
+    window.name = "second-load";
+  });
+  await page.reload();
+  await expect(page.locator("#hero-heading > span")).toHaveText([
+    "Profoundly",
+    "Hydrated.",
+  ]);
+  expect(errors).toEqual([]);
+});
 
 test("tag selection can be cleared without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
