@@ -121,5 +121,10 @@ Do not imply experimental software is commercially available. Record sources in
 `docs/sources.md`. Research models remain unpublished. No RSS feed is generated
 for this catalog. Deployment uses GitHub Actions and GitHub Pages, not Woodpecker.
 
-The homepage uses “Stay Hydrated.” as its fixed headline, including without
-JavaScript. Page metadata and the social preview use the same tagline.
+The homepage combines a random first word (Fully, Extremely, Absolutely,
+Thoroughly, Completely, Profoundly) with a second word (Immersed, Drenched,
+Sopping, Saturated, Soaked, Hydrated). Each homepage load, including a refresh, chooses
+a new random pair. Random selection can occasionally repeat a combination.
+There is no tagline storage, timer, tracking, or network request.
+Without JavaScript the headline stays “Stay Hydrated.” Page metadata and the
+social preview always use “Stay Hydrated.”

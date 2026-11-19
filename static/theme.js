@@ -1,4 +1,4 @@
-// One local display preference, never a visitor identifier or network request.
+// Local display preferences, never visitor identifiers or network requests.
 (() => {
   const key = "moist-theme";
   const system = window.matchMedia("(prefers-color-scheme: dark)");
@@ -42,3 +42,31 @@
     if (!choice) apply(system.matches ? "dark" : "light");
   });
 })();
+
+// Choose a fresh curated headline on each homepage load.
+document.addEventListener("DOMContentLoaded", () => {
+  const words = document.querySelectorAll("#hero-heading > span");
+  if (words.length !== 2) return;
+  const first = [
+    "Fully",
+    "Extremely",
+    "Absolutely",
+    "Thoroughly",
+    "Completely",
+    "Profoundly",
+  ];
+  const second = [
+    "Immersed",
+    "Drenched",
+    "Sopping",
+    "Saturated",
+    "Soaked",
+    "Hydrated",
+  ];
+  const selection = [
+    first[Math.floor(Math.random() * first.length)],
+    second[Math.floor(Math.random() * second.length)],
+  ];
+  words[0].textContent = selection[0];
+  words[1].textContent = `${selection[1]}.`;
+});
